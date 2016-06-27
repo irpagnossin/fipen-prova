@@ -1,0 +1,150 @@
+% -----------------------------------------------------------------------------------------
+% Pacote para provas da Fundação Instituto Paulista de Ensino (Fipen)
+% Autor:   Ivan Ramos Pagnossin
+% Data:    Janeiro de 2016
+% Licença: Creative Commons BY-SA International 4.0
+%
+% Package for exams of Fundação Instituto Paulista de Ensino (Fipen)
+% Author:  Ivan Ramos Pagnossin
+% Date:    January 2016
+% License: Creative Commons BY-SA International 4.0
+% -----------------------------------------------------------------------------------------
+\ProvidesPackage{fipen-prova}[2016/06/23 v0.1 - Prova da Fipen]
+\RequirePackage{ifthen}
+%\RequirePackage{everypage}
+\RequirePackage[left=20mm, top=20mm, right=20mm, bottom=20mm]{geometry}
+%\RequirePackage{tikz}
+\RequirePackage{xcolor}
+\RequirePackage{environ}
+\RequirePackage{paralist}
+\RequirePackage{calc}
+
+
+
+% Necessário para fazer cálculos de posicionamento de \node's do TikZ, na decoração das páginas.
+\usetikzlibrary{calc,arrows}
+\tikzset{>=stealth',every on chain/.append style={join},
+         every join/.style={->}}
+
+% Flags
+\newif\if@at@inlineenum
+\global\@at@inlineenumfalse
+
+\newif\if@show@answer
+\global\@show@answerfalse
+
+
+
+% Contadores
+\newcounter{question}
+\newcounter{inlineenumcounter}
+
+\newlength{\QUESTIONSKIP}
+\setlength{\QUESTIONSKIP}{\bigskipamount}
+\definecolor{foregroundblue}{rgb}{0.137,0.392,0.706}
+\definecolor{anotherblue}{rgb}{0.870,0.910,0.957}
+\definecolor{resolutioncolor}{rgb}{0.01,0.29,0.08}
+\def\QUESTIONLABEL{Questão}
+%\def\QUESTIONSCORELABEL{pontos}
+\def\RESOLUTIONLABEL{Resolução}
+
+
+\NewEnviron{question}[1]{%
+  \refstepcounter{question}
+  \par
+  \vspace{\QUESTIONSKIP}
+  \noindent
+  \begingroup  	
+    \bfseries\upshape\fontsize{11}{19}\selectfont
+    \color{foregroundblue}%
+    \MakeUppercase{\QUESTIONLABEL~\thequestion}%
+  \endgroup
+  \begingroup
+  	\footnotesize
+  	~(#1)%~\QUESTIONSCORELABEL)%
+  \endgroup
+  \par
+  \addpenalty{+300}%
+  \noindent\BODY
+  \par
+  \vspace{\QUESTIONSKIP}
+}{%
+  \addpenalty{-300}%
+}
+
+\NewEnviron{resolution}{
+	\if@show@answer
+		\par
+		\footnotesize
+		\noindent
+		\begingroup
+		    \bfseries\upshape\selectfont
+		    \color{resolutioncolor}%
+		    \MakeUppercase{\RESOLUTIONLABEL}%
+	  	\endgroup
+	  	\par
+	  	\begingroup
+	  		\color{resolutioncolor}
+			\BODY
+		\endgroup
+	\fi
+}{}
+
+\renewenvironment{enumerate}{%
+  \begin{compactenum}[\bfseries\color{foregroundblue}(a)]%
+  %\if@at@solutions\setlength\parskip{0.5em}\fi
+}{%
+  \end{compactenum}%
+}
+
+% Use o ambiente inlineenum para criar uma lista de itens de exercício sem iniciar um novo parágrafo para cada item.
+\newenvironment{inlineenum}{%
+  \@at@inlineenumtrue
+  \setcounter{inlineenumcounter}{0}%
+}{%
+  \@at@inlineenumfalse
+}
+
+% Use o comando \inlineitem para iniciar um novo item DENTRO de um ambiente inlineenum
+\providecommand\inlineitem{%
+  \if@at@inlineenum
+    \stepcounter{inlineenumcounter}%
+    \begingroup
+      \bfseries\color{foregroundblue}(\alph{inlineenumcounter})
+    \endgroup
+  \fi
+}
+
+
+\renewcommand\title[1]{
+  \gdef\@ie@disciplina{#1}
+}
+
+\renewcommand\author[1]{
+	\gdef\@ie@professor{#1}
+}
+
+% Rodapé: nome da disciplina, aulas e número da página.
+\def\@ie@foot{%
+  \color{foregroundblue}%
+  \rule[0.5em]{\textwidth}{0.1pt}\\%
+  \color{foregroundblue}%
+  \mdseries\upshape\fontsize{7.5}{13}\selectfont
+  \@ie@disciplina
+  \hfill
+  \@ie@professor
+}
+
+%\AtBeginDocument{%
+%	\begin{tikzpicture}[remember picture, overlay]	
+		%\node (a) at ($(current page.south west) + (10mm,10mm)$) {};
+		%\node (b) at ($(current page.north east) - (10mm,10mm)$) {};
+		%\filldraw[fill=anotherblue,even odd rule, draw opacity=0] (a) rectangle (b);
+%		\node[align=left] at ($(current page.south west) + (20mm, 10mm)$) [anchor=west] {\@ie@foot};
+%	\end{tikzpicture}
+%}
+
+\DeclareOption{answers}{%
+  \global\@show@answertrue%
+}
+\ProcessOptions\relax
